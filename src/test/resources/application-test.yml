@@ -1,0 +1,24 @@
+app:
+  jwt:
+    secret: test-secret-key-for-integration-tests-min-256-bits-xxxxxxxxxx
+    expiration-ms: 3600000
+  encryption:
+    key: 0123456789abcdef0123456789abcdef
+  cors:
+    allowed-origin: http://localhost:4200
+  upload:
+    max-file-size-mb: 20
+  auth:
+    max-failed-attempts: 5
+    lock-duration-minutes: 15
+  rate-limit:
+    login:
+      max-attempts: 10
+      window-seconds: 60
+  init-users:
+    admin:
+      username: ""
+      password: ""
+    partner:
+      username: ""
+      password: ""

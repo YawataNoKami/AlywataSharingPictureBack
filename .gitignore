@@ -1,0 +1,14 @@
+target/
+*.class
+*.log
+.env
+.idea/
+*.iml
+.vscode/
+.mvn/wrapper/maven-wrapper.jar
+
+# Eclipse project metadata
+.classpath
+.project
+.factorypath
+.settings/

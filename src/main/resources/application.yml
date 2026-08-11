@@ -1,0 +1,47 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: photo-app-backend
+  data:
+    mongodb:
+      uri: ${MONGO_URI:mongodb://localhost:27017/photoapp}
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: ${MAX_UPLOAD_SIZE_MB:20}MB
+      max-request-size: ${MAX_UPLOAD_SIZE_MB:20}MB
+
+app:
+  jwt:
+    # Must be at least 256 bits (32 bytes) when base64-decoded / raw. CHANGE_ME_IN_PRODUCTION.
+    secret: ${JWT_SECRET:CHANGE_ME_IN_PRODUCTION_jwt_secret_min_256_bits_xxxxxxxx}
+    expiration-ms: ${JWT_EXPIRATION_MS:86400000} # 24h
+  encryption:
+    # Exactly 32 bytes (UTF-8) required for AES-256. CHANGE_ME_IN_PRODUCTION.
+    key: ${ENCRYPTION_KEY:CHANGE_ME_IN_PRODUCTION32BYTES}
+  cors:
+    allowed-origin: ${FRONTEND_URL:http://localhost:4200}
+  upload:
+    max-file-size-mb: ${MAX_UPLOAD_SIZE_MB:20}
+  auth:
+    max-failed-attempts: 5
+    lock-duration-minutes: 15
+  rate-limit:
+    login:
+      max-attempts: 10
+      window-seconds: 60
+  init-users:
+    admin:
+      username: ${ADMIN_USERNAME:}
+      password: ${ADMIN_PASSWORD:}
+    partner:
+      username: ${PARTNER_USERNAME:}
+      password: ${PARTNER_PASSWORD:}
+
+logging:
+  level:
+    root: INFO
+    com.photoapp: INFO
+    org.springframework.security: WARN
