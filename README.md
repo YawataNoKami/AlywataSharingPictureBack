@@ -33,9 +33,64 @@ tentatives échouées, et aucune inscription publique.
 ## Prérequis
 
 - Java 21+
-- Maven 3.9+ (ou utiliser le Dockerfile qui embarque Maven)
-- Docker + Docker Compose (pour le déploiement local complet)
-- Une instance MongoDB (fournie par `docker-compose.yml` en local)
+- Maven 3.9+ (ou utiliser le Dockerfile qui embarque Maven, ou le Maven Wrapper si présent)
+- Une instance MongoDB, au choix :
+  - Docker + Docker Compose (`docker-compose.yml` fourni), **ou**
+  - MongoDB installé en local sans Docker (voir ci-dessous — c'est la
+    configuration utilisée pour les tests manuels de ce projet, Docker
+    n'étant pas toujours disponible sur la machine de développement)
+
+## Démarrage rapide (le plus simple)
+
+Un script `start-local.ps1` est fourni à la racine pour démarrer MongoDB
+(portable, sans installeur) puis le backend en une seule commande, avec des
+identifiants de test déjà configurés :
+
+```powershell
+.\start-local.ps1
+```
+
+Ce script :
+1. démarre `mongod` (télécharge/utilise l'archive MongoDB portable — voir
+   section suivante si ce n'est pas encore fait) s'il n'écoute pas déjà sur
+   le port 27017 ;
+2. build le jar si absent (`mvn clean package -DskipTests`) ;
+3. lance le backend sur `http://localhost:8080` avec :
+   - `admin` / `TestPassword123!`
+   - `partner` / `TestPassword456!`
+
+Ces identifiants et secrets sont **uniquement pour le développement local**
+— ne jamais les réutiliser dans un environnement exposé.
+
+## Installer MongoDB en local sans Docker (une seule fois)
+
+Si Docker n'est pas installé sur la machine, MongoDB peut tourner comme
+simple exécutable portable, sans installation système :
+
+```powershell
+# 1. Télécharger l'archive MongoDB Community Server (zip, pas de MSI/installeur)
+Invoke-WebRequest -Uri "https://fastdl.mongodb.org/windows/mongodb-windows-x86_64-8.0.4.zip" -OutFile "$env:TEMP\mongodb.zip"
+
+# 2. Extraire dans un dossier dédié (adapter le chemin si besoin)
+Expand-Archive -Path "$env:TEMP\mongodb.zip" -DestinationPath "E:\DEV APP MTG\mongodb-local" -Force
+
+# 3. Créer les dossiers de données et de logs
+New-Item -ItemType Directory -Force -Path "E:\DEV APP MTG\mongodb-local\data"
+New-Item -ItemType Directory -Force -Path "E:\DEV APP MTG\mongodb-local\logs"
+```
+
+Une fois cette archive extraite, `start-local.ps1` détecte automatiquement
+`mongod.exe` et s'en sert à chaque démarrage — cette étape n'est à faire
+qu'une seule fois. Les données sont persistées dans
+`E:\DEV APP MTG\mongodb-local\data` entre deux redémarrages (mais ce n'est
+pas un service Windows : il faut relancer `start-local.ps1` après chaque
+reboot de la machine).
+
+Pour arrêter MongoDB manuellement :
+
+```powershell
+Get-Process mongod | Stop-Process
+```
 
 ## Variables d'environnement
 
@@ -61,6 +116,9 @@ doivent jamais être utilisées telles quelles.
 
 ## Lancer en local avec Docker Compose
 
+> Alternative à la méthode `start-local.ps1` ci-dessus, à utiliser si Docker
+> est installé sur la machine.
+
 1. Créer un fichier `.env` à la racine (non commité) avec au minimum :
 
 ```env
@@ -82,7 +140,9 @@ docker compose up --build
 Le backend est disponible sur `http://localhost:8080`, MongoDB persiste ses
 données dans le volume Docker `mongo-data`.
 
-## Lancer en local sans Docker
+## Lancer en local sans Docker (méthode manuelle, sans le script)
+
+Si vous préférez ne pas utiliser `start-local.ps1` (ex: sous Linux/macOS) :
 
 ```bash
 # Démarrer une instance MongoDB locale (ou via docker run mongo:7.0)
